@@ -98,6 +98,8 @@ when isMainModule:
   else:
     for kind, key, val in getopt(shortNoVal=sNoVal, longNoVal=lNoVal):
       case kind
+      of cmdEnd:
+        doAssert(false)
       of cmdArgument:
         discard
       of cmdShortOption, cmdLongOption:
@@ -106,8 +108,6 @@ when isMainModule:
             rec = true
           of "p", "pattern":
             reg = true
-      of cmdEnd:
-        quit(0)
 
     if rec and reg:
       if args.len == 3:
