@@ -1,1 +1,1 @@
-### renim: minimal, performant mass renaming tool
+### renim: minimal, performant mass renaming tool (WIP)
