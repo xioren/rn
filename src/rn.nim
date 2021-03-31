@@ -1,22 +1,20 @@
 import os, strutils, strformat, re, parseopt
 
-# replace strings in filenames, takes 1 or two arguments,
-# if second argument is absent, replaces first argument with empty string.
 
 let args = commandLineParams()
 
 
-proc makeUnique(path: string): string =
+proc makeUnique(oldFilepath: string): string =
   ## make filenames unique
   var
     n = 1
-    new_path: string
+    newFilepath: string
   let
-    (dir, name, ext) = splitFile(path)
+    (dir, name, ext) = splitFile(oldFilepath)
 
   while true:
-    new_path = fmt"{dir}/{name}-{n}{ext}"
-    if fileExists(new_path):
+    newFilepath = fmt"{dir}/{name}-{n}{ext}"
+    if fileExists(newFilepath):
       n += 1
     else:
       return new_path
@@ -29,7 +27,7 @@ proc rename(this: string|Regex, that = "") =
     newFilename: string
 
   for kind, oldFilepath in walkDir(getCurrentDir()):
-    if kind == pcFile and not oldFilepath.contains("/."):
+    if kind == pcFile and not isHidden(oldFilepath):
       let (_, oldFilename, _) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
@@ -54,7 +52,7 @@ proc renameRec(this: string|Regex, that = "") =
     newFilename: string
 
   for oldFilepath in walkDirRec(getCurrentDir()):
-    if not oldFilepath.contains("/."):
+    if "/." notin oldFilepath:
       let (_, oldFilename, _) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
@@ -73,6 +71,8 @@ proc renameRec(this: string|Regex, that = "") =
 
 
 when isMainModule:
+  ## replace strings in filenames, takes 1 or two arguments,
+  ## if second argument is absent, replaces first argument with empty string.
   const
     version = "0.0.1"
     help = """
