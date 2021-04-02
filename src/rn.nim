@@ -1,9 +1,6 @@
 import os, strutils, strformat, re, parseopt
 
 
-let args = commandLineParams()
-
-
 proc makeUnique(oldFilepath: string): string =
   ## make filenames unique
   var
@@ -12,12 +9,11 @@ proc makeUnique(oldFilepath: string): string =
   let
     (dir, name, ext) = splitFile(oldFilepath)
 
-  while true:
+  newFilepath = fmt"{dir}/{name}-{n}{ext}"
+  while fileExists(newFilepath):
+    n += 1
     newFilepath = fmt"{dir}/{name}-{n}{ext}"
-    if fileExists(newFilepath):
-      n += 1
-    else:
-      return new_path
+  result = newFilepath
 
 
 proc rename(this: string|Regex, that = "") =
@@ -28,11 +24,11 @@ proc rename(this: string|Regex, that = "") =
 
   for kind, oldFilepath in walkDir(getCurrentDir()):
     if kind == pcFile and not isHidden(oldFilepath):
-      let (_, oldFilename, _) = splitFile(oldFilepath)
+      let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that)
-        newFilepath = oldFilepath.replace(oldFilename, newFilename)
+        newFilename = oldFilename.replace(this, that) & ext
+        newFilepath = joinPath(oldHead, newFilename)
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
@@ -42,7 +38,7 @@ proc rename(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         moveFile(oldFilepath, newFilepath)
-        echo oldFilename, " --> ", newFilename
+        echo oldFilename, ext, " --> ", newFilename
 
 
 proc renameRec(this: string|Regex, that = "") =
@@ -53,11 +49,11 @@ proc renameRec(this: string|Regex, that = "") =
 
   for oldFilepath in walkDirRec(getCurrentDir()):
     if "/." notin oldFilepath:
-      let (_, oldFilename, _) = splitFile(oldFilepath)
+      let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that)
-        newFilepath = oldFilepath.replace(oldFilename, newFilename)
+        newFilename = oldFilename.replace(this, that) & ext
+        newFilepath = joinPath(oldHead, newFilename)
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
@@ -67,12 +63,13 @@ proc renameRec(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         moveFile(oldFilepath, newFilepath)
-        echo oldFilename, " --> ", newFilename
+        echo oldFilename, ext, " --> ", newFilename
 
 
 when isMainModule:
   ## replace strings in filenames, takes 1 or two arguments,
   ## if second argument is absent, replaces first argument with empty string.
+  let args = commandLineParams()
   const
     version = "0.0.1"
     help = """
@@ -90,8 +87,8 @@ when isMainModule:
     sNoVal = {'r', 'e'}
     lNoVal = @["recursive", "regex"]
   var
-    rec: bool
-    reg: bool
+    rec = false
+    reg = false
 
   if args.len < 1:
     echo "<no argument>"
