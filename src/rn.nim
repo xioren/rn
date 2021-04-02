@@ -24,11 +24,11 @@ proc rename(this: string|Regex, that = "") =
 
   for kind, oldFilepath in walkDir(getCurrentDir()):
     if kind == pcFile and not isHidden(oldFilepath):
-      let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
+      let (head, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
         newFilename = oldFilename.replace(this, that)
-        newFilepath = joinPath(oldHead, addFileExt(newFilename, ext))
+        newFilepath = joinPath(head, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
@@ -49,11 +49,11 @@ proc renameRec(this: string|Regex, that = "") =
 
   for oldFilepath in walkDirRec(getCurrentDir()):
     if "/." notin oldFilepath:
-      let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
+      let (head, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
         newFilename = oldFilename.replace(this, that)
-        newFilepath = joinPath(oldHead, addFileExt(newFilename, ext))
+        newFilepath = joinPath(head, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
