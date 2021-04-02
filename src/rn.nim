@@ -27,8 +27,8 @@ proc rename(this: string|Regex, that = "") =
       let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that) & ext
-        newFilepath = joinPath(oldHead, newFilename)
+        newFilename = oldFilename.replace(this, that)
+        newFilepath = joinPath(oldHead, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
@@ -38,7 +38,7 @@ proc rename(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         moveFile(oldFilepath, newFilepath)
-        echo oldFilename, ext, " --> ", newFilename
+        echo oldFilename, " --> ", newFilename
 
 
 proc renameRec(this: string|Regex, that = "") =
@@ -52,8 +52,8 @@ proc renameRec(this: string|Regex, that = "") =
       let (oldHead, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that) & ext
-        newFilepath = joinPath(oldHead, newFilename)
+        newFilename = oldFilename.replace(this, that)
+        newFilepath = joinPath(oldHead, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
@@ -63,7 +63,7 @@ proc renameRec(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         moveFile(oldFilepath, newFilepath)
-        echo oldFilename, ext, " --> ", newFilename
+        echo oldFilename, " --> ", newFilename
 
 
 when isMainModule:
