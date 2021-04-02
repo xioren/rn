@@ -37,8 +37,11 @@ proc rename(this: string|Regex, that = "") =
           else:
             newFilepath = makeUnique(newFilepath)
 
-        moveFile(oldFilepath, newFilepath)
-        echo oldFilename, " --> ", newFilename
+        try:
+          moveFile(oldFilepath, newFilepath)
+          echo oldFilename, " --> ", newFilename
+        except OSError:
+          echo "error renaming ", oldFilename
 
 
 proc renameRec(this: string|Regex, that = "") =
@@ -62,8 +65,11 @@ proc renameRec(this: string|Regex, that = "") =
           else:
             newFilepath = makeUnique(newFilepath)
 
-        moveFile(oldFilepath, newFilepath)
-        echo oldFilename, " --> ", newFilename
+        try:
+          moveFile(oldFilepath, newFilepath)
+          echo oldFilename, " --> ", newFilename
+        except OSError:
+          echo "error renaming ", oldFilename
 
 
 when isMainModule:
@@ -71,7 +77,7 @@ when isMainModule:
   ## if second argument is absent, replaces first argument with empty string.
   let args = commandLineParams()
   const
-    version = "0.0.1"
+    version = "0.0.2"
     help = """
   Usage: rn [options] this[ that]
 
