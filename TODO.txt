@@ -1,3 +1,2 @@
 - add directory mode?
 - add glob search and replace?
-- handle permission errors

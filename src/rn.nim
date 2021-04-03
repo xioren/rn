@@ -1,7 +1,7 @@
 import os, strutils, strformat, re, parseopt
 
 
-proc makeUnique(oldFilepath: string): string =
+proc makeUnique(oldFilepath: string): string {.inline.} =
   ## make filenames unique
   var
     n = 1
@@ -51,6 +51,7 @@ proc renameRec(this: string|Regex, that = "") =
     newFilename: string
 
   for oldFilepath in walkDirRec(getCurrentDir()):
+    # NOTE: ignore non hidden files within hidden directories
     if "/." notin oldFilepath:
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 
@@ -73,8 +74,8 @@ proc renameRec(this: string|Regex, that = "") =
 
 
 when isMainModule:
-  ## replace strings in filenames, takes 1 or two arguments,
-  ## if second argument is absent, replaces first argument with empty string.
+  ##[replace strings in filenames, takes 1 or two arguments,
+  if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
     version = "0.0.2"
