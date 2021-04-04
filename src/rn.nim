@@ -89,6 +89,7 @@ when isMainModule:
 
   Options:
     -r, --recursive                 Rename files recursively
+    -p, --pattern                   Regex or glob pattern
     -d, --dry                       Dry run
 
   Examples:
