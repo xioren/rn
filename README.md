@@ -6,7 +6,7 @@
 + supports regex
 + shallow (default) and recursive modes
 + hidden files safe
-+ collision/overwriting safe
++ collision/overwrite safe
 
 
 ### examples:

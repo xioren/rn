@@ -87,9 +87,9 @@ when isMainModule:
     -p, --pattern                   Regex pattern
 
   Examples:
-    rn "My Files" my_files
-    rn -r .
-    rn --pattern "\s+" _
+    rn "&" and
+    rn -r this
+    rn --pattern "\s+" -
   """
     sNoVal = {'r', 'e'}
     lNoVal = @["recursive", "regex"]
@@ -103,11 +103,13 @@ when isMainModule:
     for kind, key, val in getopt(shortNoVal=sNoVal, longNoVal=lNoVal):
       case kind
       of cmdEnd:
-        doAssert(false)
+        assert false
       of cmdArgument:
         discard
       of cmdShortOption, cmdLongOption:
         case key
+          of "h", "help": echo help;quit(0)
+          of "v", "version": echo version;quit(0)
           of "r", "recursive":
             rec = true
           of "p", "pattern":
