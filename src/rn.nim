@@ -78,13 +78,13 @@ when isMainModule:
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.2"
+    version = "0.0.1"
     help = """
   Usage: rn [options] this[ that]
 
   Options:
     -r, --recursive                 Rename files recursively
-    -p, --pattern                   Use a regex pattern
+    -p, --pattern                   Regex pattern
 
   Examples:
     rn "My Files" my_files
