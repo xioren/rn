@@ -16,8 +16,8 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
   result = newFilepath
 
 
-proc rename(this: string|Regex, that = "") =
-  ## replace "this" string or regex pattern with "that" string in filenames
+proc rename(this: Regex, that = "", dry: bool) =
+  ## replace "this" regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -38,14 +38,15 @@ proc rename(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         try:
-          moveFile(oldFilepath, newFilepath)
+          if not dry:
+            moveFile(oldFilepath, newFilepath)
           echo oldFilename, " --> ", newFilename
         except OSError:
           echo "error renaming ", oldFilename
 
 
-proc renameRec(this: string|Regex, that = "") =
-  ## recursively replace "this" string or regex pattern with "that" string in filenames
+proc renameRec(this: Regex, that = "", dry: bool) =
+  ## recursively replace "this" regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -68,7 +69,8 @@ proc renameRec(this: string|Regex, that = "") =
             newFilepath = makeUnique(newFilepath)
 
         try:
-          moveFile(oldFilepath, newFilepath)
+          if not dry:
+            moveFile(oldFilepath, newFilepath)
           echo oldFilename, " --> ", newFilename
         except OSError:
           echo "error renaming ", oldFilename
@@ -79,24 +81,26 @@ when isMainModule:
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.1"
+    version = "0.0.2"
     help = """
   Usage: rn [options] this[ that]
 
   Options:
     -r, --recursive                 Rename files recursively
-    -p, --pattern                   Regex pattern
+    -d, --dry                       Dry run
 
   Examples:
     rn "&" and
     rn -r this
-    rn --pattern "\s+" -
+    rn W"\s+" -
+    rn -d *-copy file
   """
-    sNoVal = {'r', 'e'}
-    lNoVal = @["recursive", "regex"]
+    sNoVal = {'r', 'd'}
+    lNoVal = @["recursive", "dry"]
   var
     rec = false
-    reg = false
+    dry = false
+    numCmdArgs = 0
 
   if args.len < 1:
     echo "<no argument>"
@@ -106,33 +110,23 @@ when isMainModule:
       of cmdEnd:
         assert false
       of cmdArgument:
-        discard
+        numCmdArgs += 1
       of cmdShortOption, cmdLongOption:
         case key
           of "h", "help": echo help;quit(0)
           of "v", "version": echo version;quit(0)
           of "r", "recursive":
             rec = true
-          of "p", "pattern":
-            reg = true
+          of "d", "dry":
+            dry = true
 
-    if rec and reg:
-      if args.len == 3:
-        renameRec(re(args[^1]))
+    if numCmdArgs >= 2:
+      if rec:
+        renameRec(re(args[^2].replace("*", ".+")), args[^1], dry)
       else:
-        renameRec(re(args[^2]), args[^1])
-    elif rec:
-      if args.len == 2:
-        renameRec(args[^1])
-      else:
-        renameRec(args[^2], args[^1])
-    elif reg:
-      if args.len == 2:
-        rename(re(args[^1]))
-      else:
-        rename(re(args[^2]), args[^1])
+        rename(re(args[^2].replace("*", ".+")), args[^1], dry)
     else:
-      if args.len == 1:
-        rename(args[0])
+      if rec:
+        renameRec(re(args[^1].replace("*", ".+")), dry=dry)
       else:
-        rename(args[0], args[1])
+        rename(re(args[^1].replace("*", ".+")), dry=dry)

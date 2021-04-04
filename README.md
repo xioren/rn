@@ -3,7 +3,7 @@
 
 ### features:
 + ultra minimal
-+ supports regex
++ supports regex and glob
 + shallow (default) and recursive modes
 + hidden files safe
 + collision/overwrite safe
@@ -14,6 +14,7 @@
 rn "&" and
 rn -r this
 rn --pattern "\s+" -
+rn -p -d *-copy file
 ```
 
 
