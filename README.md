@@ -15,3 +15,9 @@ rn "&" and
 rn -r this
 rn --pattern "\s+" -
 ```
+
+
+### installation:
+```bash
+nimble install rn
+```
