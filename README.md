@@ -1,4 +1,4 @@
-# rn: mass rename done right
+# rn
 
 
 ### features:

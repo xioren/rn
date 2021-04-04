@@ -32,7 +32,7 @@ proc rename(this: string | Regex, that = "", dry: bool) =
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
-            # BUG: erroneously removes files when new name == old name
+            # BUG: erroneously removes non-duplicate files when new name == old name
             # discard tryRemoveFile(oldFilepath)
             continue
           else:
@@ -64,7 +64,7 @@ proc renameRec(this: string | Regex, that = "", dry: bool) =
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
-            # BUG: erroneously removes files when new name == old name
+            # BUG: erroneously removes non-duplicate files when new name == old name
             # discard tryRemoveFile(oldFilepath)
             continue
           else:
