@@ -1,4 +1,4 @@
-import os, strutils, strformat, re, parseopt
+import os, strutils, re, parseopt, strformat
 
 
 proc makeUnique(oldFilepath: string): string {.inline.} =
@@ -9,10 +9,10 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
   let
     (dir, name, ext) = splitFile(oldFilepath)
 
-  newFilepath = fmt"{dir}/{name}-{n}{ext}"
+  newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   while fileExists(newFilepath):
     n += 1
-    newFilepath = fmt"{dir}/{name}-{n}{ext}"
+    newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   result = newFilepath
 
 
@@ -52,6 +52,7 @@ proc renameRec(this: string|Regex, that = "") =
 
   for oldFilepath in walkDirRec(getCurrentDir()):
     # NOTE: ignore non hidden files within hidden directories
+    # isHidden wont work here
     if "/." notin oldFilepath:
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 

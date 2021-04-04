@@ -1,2 +1,3 @@
 - add directory mode?
 - add glob search and replace?
+- dry option
