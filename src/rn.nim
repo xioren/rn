@@ -92,8 +92,8 @@ when isMainModule:
   Examples:
     rn "&" and
     rn -r this
-    rn W"\s+" -
-    rn -d *-copy file
+    rn "\s+" -
+    rn --dry *-copy file
   """
     sNoVal = {'r', 'd'}
     lNoVal = @["recursive", "dry"]

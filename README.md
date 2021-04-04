@@ -13,8 +13,8 @@
 ```bash
 rn "&" and
 rn -r this
-rn --pattern "\s+" -
-rn -p -d *-copy file
+rn "\s+" -
+rn --dry *-copy file
 ```
 
 
