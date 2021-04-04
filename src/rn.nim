@@ -32,7 +32,8 @@ proc rename(this: Regex, that = "", dry: bool) =
 
         if fileExists(newFilepath):
           if sameFileContent(oldFilepath, newFilepath):
-            discard tryRemoveFile(oldFilepath)
+            # BUG: erroneously removes files when new name == old name
+            # discard tryRemoveFile(oldFilepath)
             continue
           else:
             newFilepath = makeUnique(newFilepath)
@@ -62,8 +63,10 @@ proc renameRec(this: Regex, that = "", dry: bool) =
         newFilepath = joinPath(dir, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
+          newFilepath = makeUnique(newFilepath)
           if sameFileContent(oldFilepath, newFilepath):
-            discard tryRemoveFile(oldFilepath)
+            # BUG: erroneously removes files when new name == old name
+            # discard tryRemoveFile(oldFilepath)
             continue
           else:
             newFilepath = makeUnique(newFilepath)
@@ -81,7 +84,7 @@ when isMainModule:
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.2"
+    version = "0.0.3"
     help = """
   Usage: rn [options] this[ that]
 
@@ -120,13 +123,15 @@ when isMainModule:
           of "d", "dry":
             dry = true
 
-    if numCmdArgs >= 2:
+    if numCmdArgs == 2:
       if rec:
         renameRec(re(args[^2].replace("*", ".+")), args[^1], dry)
       else:
         rename(re(args[^2].replace("*", ".+")), args[^1], dry)
-    else:
+    elif numCmdArgs == 1:
       if rec:
         renameRec(re(args[^1].replace("*", ".+")), dry=dry)
       else:
         rename(re(args[^1].replace("*", ".+")), dry=dry)
+    else:
+      echo "<invalid arguments>"

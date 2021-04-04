@@ -22,3 +22,7 @@ rn --dry *-copy file
 ```bash
 nimble install rn
 ```
+
+
+### not:
+  all input for "this" argument are handled as regex patterns and relevant special chars need to be escaped to be taken as literal. i.e. "\+" for literal "+".
