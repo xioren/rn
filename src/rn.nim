@@ -16,8 +16,8 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
   result = newFilepath
 
 
-proc rename(this: Regex, that = "", dry: bool) =
-  ## replace "this" regex pattern with "that" string in filenames
+proc rename(this: string | Regex, that = "", dry: bool) =
+  ## replace "this" string or regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -46,8 +46,8 @@ proc rename(this: Regex, that = "", dry: bool) =
           echo "error renaming ", oldFilename
 
 
-proc renameRec(this: Regex, that = "", dry: bool) =
-  ## recursively replace "this" regex pattern with "that" string in filenames
+proc renameRec(this: string | Regex, that = "", dry: bool) =
+  ## recursively replace "this" string or regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -63,7 +63,6 @@ proc renameRec(this: Regex, that = "", dry: bool) =
         newFilepath = joinPath(dir, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
-          newFilepath = makeUnique(newFilepath)
           if sameFileContent(oldFilepath, newFilepath):
             # BUG: erroneously removes files when new name == old name
             # discard tryRemoveFile(oldFilepath)
@@ -84,7 +83,7 @@ when isMainModule:
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.3"
+    version = "0.0.4"
     help = """
   Usage: rn [options] this[ that]
 
@@ -95,15 +94,16 @@ when isMainModule:
   Examples:
     rn "&" and
     rn -r this
-    rn "\s+" -
-    rn --dry *-copy file
+    rn -p "\s+" -
+    rn -p --dry "*-copy" file
   """
-    sNoVal = {'r', 'd'}
-    lNoVal = @["recursive", "dry"]
+    sNoVal = {'r', 'd', 'p'}
+    lNoVal = @["recursive", "dry", "pattern"]
   var
     rec = false
     dry = false
-    numCmdArgs = 0
+    reg = false
+    cmdArgs: seq[string] = @[]
 
   if args.len < 1:
     echo "<no argument>"
@@ -113,25 +113,35 @@ when isMainModule:
       of cmdEnd:
         assert false
       of cmdArgument:
-        numCmdArgs += 1
+        cmdArgs.add(key)
       of cmdShortOption, cmdLongOption:
         case key
           of "h", "help": echo help;quit(0)
           of "v", "version": echo version;quit(0)
           of "r", "recursive":
             rec = true
+          of "p", "pattern":
+            reg = true
           of "d", "dry":
             dry = true
 
-    if numCmdArgs == 2:
-      if rec:
-        renameRec(re(args[^2].replace("*", ".+")), args[^1], dry)
+    if rec and reg:
+      if cmdArgs.len == 2:
+        renameRec(re(cmdArgs[0].replace("*", ".+")), cmdArgs[1], dry)
       else:
-        rename(re(args[^2].replace("*", ".+")), args[^1], dry)
-    elif numCmdArgs == 1:
-      if rec:
-        renameRec(re(args[^1].replace("*", ".+")), dry=dry)
+        renameRec(re(cmdArgs[0].replace("*", ".+")), dry=dry)
+    elif rec:
+      if cmdArgs.len == 2:
+        renameRec(cmdArgs[0], cmdArgs[1], dry)
       else:
-        rename(re(args[^1].replace("*", ".+")), dry=dry)
+        renameRec(cmdArgs[0], dry=dry)
+    elif reg:
+      if cmdArgs.len == 2:
+        rename(re(cmdArgs[0].replace("*", ".+")), cmdArgs[1], dry)
+      else:
+        rename(re(cmdArgs[0].replace("*", ".+")), dry=dry)
     else:
-      echo "<invalid arguments>"
+      if cmdArgs.len == 2:
+        rename(cmdArgs[0], cmdArgs[1], dry)
+      else:
+        rename(cmdArgs[0], dry=dry)
