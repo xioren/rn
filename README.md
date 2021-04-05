@@ -14,7 +14,7 @@
 rn "&" and
 rn -r this
 rn -p "\s+" -
-rn -p --dry "*-copy" file
+rn -g --dry "*-copy" file
 ```
 
 
@@ -22,3 +22,6 @@ rn -p --dry "*-copy" file
 ```bash
 nimble install rn
 ```
+
+### note:
+  currently glob only does shallow matching.
