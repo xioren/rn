@@ -22,6 +22,3 @@ rn -g --dry "*-copy" file
 ```bash
 nimble install rn
 ```
-
-### note:
-  currently glob only does shallow matching.

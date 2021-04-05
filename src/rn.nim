@@ -104,9 +104,32 @@ proc renameGlob(this, that: string, dry: bool) =
         echo "error renaming ", oldFilename
 
 
-# proc renameGlobRec(this: string, that = "", dry: bool) =
-#   ## recursively rename files matching "this" glob pattern with "that" string
-#   discard
+proc renameGlobRec(this, that: string, dry: bool) =
+  ## recursively rename files matching "this" glob pattern with "that" string
+  var newFilepath: string
+
+  for dir in walkDirRec(getCurrentDir(), yieldFilter = {pcDir}):
+    for oldFilepath in walkFiles(joinPath(dir, this)):
+      if "/." notin oldFilepath:
+        let (_, oldFilename, ext) = splitFile(oldFilepath)
+
+        newFilepath = joinPath(dir, addFileExt(that, ext))
+
+        if fileExists(newFilepath):
+          if sameFileContent(oldFilepath, newFilepath):
+            # BUG: erroneously removes non-duplicate files when new name == old name
+            # discard tryRemoveFile(oldFilepath)
+            continue
+          else:
+            newFilepath = makeUnique(newFilepath)
+
+        try:
+          if not dry:
+            moveFile(oldFilepath, newFilepath)
+          echo oldFilename, " --> ", that
+        except OSError:
+          echo "error renaming ", oldFilename
+
 
 
 when isMainModule:
@@ -114,7 +137,7 @@ when isMainModule:
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.5"
+    version = "0.0.6"
     help = """
   Usage: rn [options] this[ that]
 
@@ -165,7 +188,7 @@ when isMainModule:
         renameRec(re(cmdArgs[0]), cmdArgs[1], dry)
       else:
         renameRec(re(cmdArgs[0]), dry=dry)
-    elif rec:
+    elif rec and not glob:
       if cmdArgs.len == 2:
         renameRec(cmdArgs[0], cmdArgs[1], dry)
       else:
@@ -175,6 +198,13 @@ when isMainModule:
         rename(re(cmdArgs[0]), cmdArgs[1], dry)
       else:
         rename(re(cmdArgs[0]), dry=dry)
+    elif glob and rec:
+      if cmdArgs.len == 2:
+        # TEMP: work around --> no true rec glob proc in std
+        renameGlob(cmdArgs[0], cmdArgs[1], dry)
+        renameGlobRec(cmdArgs[0], cmdArgs[1], dry)
+      else:
+        echo "invalid arguments"
     elif glob:
       if cmdArgs.len == 2:
         renameGlob(cmdArgs[0], cmdArgs[1], dry)
