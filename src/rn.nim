@@ -142,9 +142,9 @@ when isMainModule:
 
   Options:
     -r, --recursive                 Rename files recursively
-    -p, --pattern                   Regex or glob pattern
-    -d, --dry                       Dry run
+    -p, --pattern                   Regex match
     -g, --glob                      Glob match
+    -d, --dry                       Dry run
 
   Examples:
     rn "&" and
