@@ -131,7 +131,6 @@ proc renameGlobRec(this, that: string, dry: bool) =
           echo "error renaming ", oldFilename
 
 
-
 when isMainModule:
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
@@ -145,6 +144,7 @@ when isMainModule:
     -r, --recursive                 Rename files recursively
     -p, --pattern                   Regex or glob pattern
     -d, --dry                       Dry run
+    -g, --glob                      Glob match
 
   Examples:
     rn "&" and
@@ -198,16 +198,12 @@ when isMainModule:
         rename(re(cmdArgs[0]), cmdArgs[1], dry)
       else:
         rename(re(cmdArgs[0]), dry=dry)
-    elif glob and rec:
-      if cmdArgs.len == 2:
-        # TEMP: work around --> no true rec glob proc in std
-        renameGlob(cmdArgs[0], cmdArgs[1], dry)
-        renameGlobRec(cmdArgs[0], cmdArgs[1], dry)
-      else:
-        echo "invalid arguments"
     elif glob:
       if cmdArgs.len == 2:
         renameGlob(cmdArgs[0], cmdArgs[1], dry)
+        # TEMP: work around --> no true rec glob proc in std
+        if rec:
+          renameGlobRec(cmdArgs[0], cmdArgs[1], dry)
       else:
         echo "invalid arguments"
     else:
