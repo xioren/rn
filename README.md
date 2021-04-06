@@ -13,7 +13,7 @@
 ```bash
 rn "&" and
 rn -r copy
-rn -p "\s+" -
+rn -p "\s+" _
 rn -g --dry "*.jpeg" image
 ```
 
