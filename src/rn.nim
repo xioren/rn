@@ -136,7 +136,7 @@ proc main() =
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.8"
+    version = "0.0.9"
     help = """
   Usage: rn [options] this[ that]
 

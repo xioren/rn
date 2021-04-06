@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.0.8"
+version       = "0.0.9"
 author        = "xioren"
 description   = "minimal, performant mass renaming tool"
 license       = "MIT"
@@ -10,4 +10,4 @@ bin           = @["rn"]
 
 # Dependencies
 
-requires "nim >= 1.4.2"
+requires "nim >= 1.0.6"
