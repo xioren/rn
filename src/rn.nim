@@ -131,12 +131,12 @@ proc renameGlobRec(this, that: string, dry: bool) =
           echo "error renaming ", oldFilename
 
 
-when isMainModule:
+proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   let args = commandLineParams()
   const
-    version = "0.0.6"
+    version = "0.0.7"
     help = """
   Usage: rn [options] this[ that]
 
@@ -148,9 +148,9 @@ when isMainModule:
 
   Examples:
     rn "&" and
-    rn -r this
+    rn -r -copy
     rn -p "\s+" -
-    rn -g --dry "*-copy" file
+    rn -g --dry "*.jpeg" image
   """
     sNoVal = {'r', 'd', 'p', 'g'}
     lNoVal = @["recursive", "dry", "pattern", "glob"]
@@ -167,13 +167,17 @@ when isMainModule:
     for kind, key, val in getopt(shortNoVal=sNoVal, longNoVal=lNoVal):
       case kind
       of cmdEnd:
-        assert false
+        return
       of cmdArgument:
         cmdArgs.add(key)
       of cmdShortOption, cmdLongOption:
         case key
-          of "h", "help": echo help;quit(0)
-          of "v", "version": echo version;quit(0)
+          of "h", "help":
+            echo help
+            return
+          of "v", "version":
+            echo version
+            return
           of "r", "recursive":
             rec = true
           of "p", "pattern":
@@ -183,21 +187,17 @@ when isMainModule:
           of "g", "glob":
             glob = true
 
-    if rec and reg:
-      if cmdArgs.len == 2:
-        renameRec(re(cmdArgs[0]), cmdArgs[1], dry)
+    if reg:
+      if rec:
+        if cmdArgs.len == 2:
+          renameRec(re(cmdArgs[0]), cmdArgs[1], dry)
+        else:
+          renameRec(re(cmdArgs[0]), dry=dry)
       else:
-        renameRec(re(cmdArgs[0]), dry=dry)
-    elif rec and not glob:
-      if cmdArgs.len == 2:
-        renameRec(cmdArgs[0], cmdArgs[1], dry)
-      else:
-        renameRec(cmdArgs[0], dry=dry)
-    elif reg:
-      if cmdArgs.len == 2:
-        rename(re(cmdArgs[0]), cmdArgs[1], dry)
-      else:
-        rename(re(cmdArgs[0]), dry=dry)
+        if cmdArgs.len == 2:
+          rename(re(cmdArgs[0]), cmdArgs[1], dry)
+        else:
+          rename(re(cmdArgs[0]), dry=dry)
     elif glob:
       if cmdArgs.len == 2:
         renameGlob(cmdArgs[0], cmdArgs[1], dry)
@@ -207,7 +207,17 @@ when isMainModule:
       else:
         echo "invalid arguments"
     else:
-      if cmdArgs.len == 2:
-        rename(cmdArgs[0], cmdArgs[1], dry)
+      if rec:
+        if cmdArgs.len == 2:
+          renameRec(cmdArgs[0], cmdArgs[1], dry)
+        else:
+          renameRec(cmdArgs[0], dry=dry)
       else:
-        rename(cmdArgs[0], dry=dry)
+        if cmdArgs.len == 2:
+          rename(cmdArgs[0], cmdArgs[1], dry)
+        else:
+          rename(cmdArgs[0], dry=dry)
+
+
+when isMainModule:
+  main()

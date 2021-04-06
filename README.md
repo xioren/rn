@@ -12,9 +12,9 @@
 ### examples:
 ```bash
 rn "&" and
-rn -r this
+rn -r -copy
 rn -p "\s+" -
-rn -g --dry "*-copy" file
+rn -g --dry "*.jpeg" image
 ```
 
 
@@ -22,3 +22,7 @@ rn -g --dry "*-copy" file
 ```bash
 nimble install rn
 ```
+
+
+### notes:
++ for all modes except glob, leaving out the second argument ("that") simply removes the first argument ("this") from filenames, instead of replacing.
