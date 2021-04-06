@@ -148,7 +148,7 @@ proc main() =
 
   Examples:
     rn "&" and
-    rn -r -copy
+    rn -r copy
     rn -p "\s+" -
     rn -g --dry "*.jpeg" image
   """

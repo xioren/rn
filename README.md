@@ -2,7 +2,7 @@
 
 
 ### features:
-+ ultra minimal
++ minimal
 + supports regex and glob
 + shallow (default) and recursive modes
 + hidden files safe
@@ -12,7 +12,7 @@
 ### examples:
 ```bash
 rn "&" and
-rn -r -copy
+rn -r copy
 rn -p "\s+" -
 rn -g --dry "*.jpeg" image
 ```
