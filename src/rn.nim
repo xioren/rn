@@ -1,4 +1,4 @@
-import os, strutils, re, parseopt, strformat
+import os, strutils, re, sequtils, strformat
 
 
 proc makeUnique(oldFilepath: string): string {.inline.} =
@@ -134,9 +134,9 @@ proc renameGlobRec(this, that: string, dry: bool) =
 proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
-  let args = commandLineParams()
+  var args = commandLineParams()
   const
-    version = "0.0.9"
+    version = "0.1.0"
     help = """
   Usage: rn [options] this[ that]
 
@@ -152,71 +152,68 @@ proc main() =
     rn -p "\s+" _
     rn -g --dry "*.jpeg" image
   """
-    sNoVal = {'r', 'd', 'p', 'g'}
-    lNoVal = @["recursive", "dry", "pattern", "glob"]
+    acceptedArgs = ["-r", "--recursive", "-d", "--dry", "-p", "--pattern",
+                    "-g", "--glob", "-h", "--help", "-v", "--version"]
   var
     rec = false
     dry = false
     reg = false
     glob = false
-    cmdArgs: seq[string] = @[]
+
+  proc filter(x: string): bool =
+    not acceptedArgs.contains(x)
 
   if args.len < 1:
     echo "<no argument>"
   else:
-    for kind, key, val in getopt(shortNoVal=sNoVal, longNoVal=lNoVal):
-      case kind
-      of cmdEnd:
+    for arg in args:
+      if arg == "-h" or arg == "--help":
+        echo help
         return
-      of cmdArgument:
-        cmdArgs.add(key)
-      of cmdShortOption, cmdLongOption:
-        case key
-          of "h", "help":
-            echo help
-            return
-          of "v", "version":
-            echo version
-            return
-          of "r", "recursive":
-            rec = true
-          of "p", "pattern":
-            reg = true
-          of "d", "dry":
-            dry = true
-          of "g", "glob":
-            glob = true
+      if arg == "-v" or arg == "--version":
+        echo version
+        return
+      if arg == "-r" or arg == "--recursive":
+        rec = true
+      if arg == "-p" or arg == "--pattern":
+        reg = true
+      if arg == "-d" or arg == "--dry":
+        dry = true
+      if arg == "-g" or arg == "--glob":
+        glob = true
+
+    keepIf(args, filter)
 
     if reg:
       if rec:
-        if cmdArgs.len == 2:
-          renameRec(re(cmdArgs[0]), cmdArgs[1], dry)
+        if args.len == 2:
+          renameRec(re(args[0]), args[1], dry)
         else:
-          renameRec(re(cmdArgs[0]), dry=dry)
+          renameRec(re(args[0]), dry=dry)
       else:
-        if cmdArgs.len == 2:
-          rename(re(cmdArgs[0]), cmdArgs[1], dry)
+        if args.len == 2:
+          rename(re(args[0]), args[1], dry)
         else:
-          rename(re(cmdArgs[0]), dry=dry)
+          rename(re(args[0]), dry=dry)
     elif glob:
-      if cmdArgs.len == 2:
-        renameGlob(cmdArgs[0], cmdArgs[1], dry)
+      if args.len == 2:
+        renameGlob(args[0], args[1], dry)
         # TEMP: work around --> no true rec glob proc in std
         if rec:
-          renameGlobRec(cmdArgs[0], cmdArgs[1], dry)
+          renameGlobRec(args[0], args[1], dry)
       else:
         echo "invalid arguments"
     else:
       if rec:
-        if cmdArgs.len == 2:
-          renameRec(cmdArgs[0], cmdArgs[1], dry)
+        if args.len == 2:
+          renameRec(args[0], args[1], dry)
         else:
-          renameRec(cmdArgs[0], dry=dry)
+          renameRec(args[0], dry=dry)
       else:
-        if cmdArgs.len == 2:
-          rename(cmdArgs[0], cmdArgs[1], dry)
+        if args.len == 2:
+          rename(args[0], args[1], dry)
         else:
-          rename(cmdArgs[0], dry=dry)
+          rename(args[0], dry=dry)
 
 
 when isMainModule:
