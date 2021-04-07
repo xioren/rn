@@ -1,3 +1,1 @@
 - add directory mode?
-- improve glob to include ext (for match only)
-  e.g. *.mp4
