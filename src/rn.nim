@@ -1,7 +1,7 @@
 import os, strutils, re, sequtils, strformat, terminal
 
 
-template echoDelta(this: string | Regex, that, filename: string, ) {.inline.} =
+template echoDelta(this: string | Regex, that, filename: string) =
   ## echo filename differences with highlighting
   let parts = filename.split(this)
   stdout.styledWrite(fgCyan, filename & " --> ")
