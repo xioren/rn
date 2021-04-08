@@ -1,7 +1,7 @@
 import os, strutils, re, sequtils, strformat, terminal
 
 
-template echoDelta(this: string | Regex, that, filename: string) =
+proc echoDelta(this: string | Regex, that, filename: string) {.inline.} =
   ## echo filename differences with highlighting
   let parts = filename.split(this)
   stdout.styledWrite(fgCyan, filename & " --> ")
@@ -55,7 +55,7 @@ proc rename(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echoDelta this, that, oldFilename
+          echoDelta(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -87,7 +87,7 @@ proc renameRec(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echoDelta this, that, oldFilename
+          echoDelta(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -113,7 +113,7 @@ proc renameGlob(this, that: string, dry: bool) =
       try:
         if not dry:
           moveFile(oldFilepath, newFilepath)
-        echoDelta this, that, oldFilename
+        echoDelta(this, that, oldFilename)
       except OSError:
         echo "error renaming ", oldFilename
 
@@ -142,7 +142,7 @@ proc renameGlobRec(this, that: string, dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echoDelta this, that, oldFilename
+          echoDelta(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
