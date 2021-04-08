@@ -1,11 +1,10 @@
 import os, strutils, re, sequtils, strformat, terminal
 
 
-proc fancyEcho(filename, that: string, this: string | Regex) {.inline.} =
+proc fancyEcho(this: string | Regex, that, filename: string, ) {.inline.} =
   ## highlight swapped parts
   let parts = filename.split(this)
-  stdout.styledWrite(fgCyan, filename)
-  stdout.styledWrite(fgCyan, " --> ")
+  stdout.styledWrite(fgCyan, filename & " --> ")
 
   if parts[0] == filename:
     stdout.styledWriteLine(fgWhite, that)
@@ -56,7 +55,7 @@ proc rename(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          fancyecho(oldFilename, that, this)
+          fancyecho(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -88,7 +87,7 @@ proc renameRec(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          fancyecho(oldFilename, that, this)
+          fancyecho(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -114,7 +113,7 @@ proc renameGlob(this, that: string, dry: bool) =
       try:
         if not dry:
           moveFile(oldFilepath, newFilepath)
-        fancyecho(oldFilename, that, this)
+        fancyecho(this, that, oldFilename)
       except OSError:
         echo "error renaming ", oldFilename
 
@@ -143,7 +142,7 @@ proc renameGlobRec(this, that: string, dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          fancyecho(oldFilename, that, this)
+          fancyecho(this, that, oldFilename)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -152,24 +151,24 @@ proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   const
-    version = "0.1.1"
+    version = "0.1.2"
     help = """
   Usage: rn [options] this[ that]
 
   Options:
     -r, --recursive                 Rename files recursively
-    -p, --pattern                   Regex match
+    -R, --regex                     Regex match
     -g, --glob                      Glob match
     -d, --dry                       Dry run
 
   Examples:
     rn "&" and
     rn -r copy
-    rn -p "\s+" _
+    rn -R "\s+" _
     rn --glob --dry "*.jpeg" image
   """
   # NOTE: basic arg parser implemented as the parseopt module is not suitable
-    acceptedOpts = ["-r", "--recursive", "-d", "--dry", "-p", "--pattern",
+    acceptedOpts = ["-r", "--recursive", "-d", "--dry", "-R", "--regex",
                     "-g", "--glob", "-h", "--help", "-v", "--version"]
   var
     args = commandLineParams()
@@ -194,7 +193,7 @@ proc main() =
         return
       elif arg == "-r" or arg == "--recursive":
         rec = true
-      elif arg == "-p" or arg == "--pattern":
+      elif arg == "-R" or arg == "--regex":
         reg = true
       elif arg == "-d" or arg == "--dry":
         dry = true
