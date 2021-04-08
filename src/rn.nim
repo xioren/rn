@@ -1,4 +1,19 @@
-import os, strutils, re, sequtils, strformat
+import os, strutils, re, sequtils, strformat, terminal
+
+
+proc fancyEcho(filename, that: string, this: string | Regex) {.inline.} =
+  ## highlight swapped parts
+  let parts = filename.split(this)
+  stdout.styledWrite(fgCyan, filename)
+  stdout.styledWrite(fgCyan, " --> ")
+
+  if parts[0] == filename:
+    stdout.styledWriteLine(fgWhite, that)
+  else:
+    for part in parts[0..^2]:
+      stdout.styledWrite(fgCyan, part)
+      stdout.styledWrite(fgWhite, that)
+    stdout.styledWriteLine(fgCyan, parts[^1])
 
 
 proc makeUnique(oldFilepath: string): string {.inline.} =
@@ -41,7 +56,7 @@ proc rename(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echo oldFilename, " --> ", newFilename
+          fancyecho(oldFilename, that, this)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -73,7 +88,7 @@ proc renameRec(this: string | Regex, that = "", dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echo oldFilename, " --> ", newFilename
+          fancyecho(oldFilename, that, this)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -99,7 +114,7 @@ proc renameGlob(this, that: string, dry: bool) =
       try:
         if not dry:
           moveFile(oldFilepath, newFilepath)
-        echo oldFilename, " --> ", that
+        fancyecho(oldFilename, that, this)
       except OSError:
         echo "error renaming ", oldFilename
 
@@ -110,6 +125,8 @@ proc renameGlobRec(this, that: string, dry: bool) =
 
   for dir in walkDirRec(getCurrentDir(), yieldFilter = {pcDir}):
     for oldFilepath in walkFiles(joinPath(dir, this)):
+      # NOTE: ignore non hidden files within hidden directories
+      # isHidden wont work here
       if "/." notin oldFilepath:
         let (_, oldFilename, ext) = splitFile(oldFilepath)
 
@@ -126,7 +143,7 @@ proc renameGlobRec(this, that: string, dry: bool) =
         try:
           if not dry:
             moveFile(oldFilepath, newFilepath)
-          echo oldFilename, " --> ", that
+          fancyecho(oldFilename, that, this)
         except OSError:
           echo "error renaming ", oldFilename
 
@@ -134,9 +151,8 @@ proc renameGlobRec(this, that: string, dry: bool) =
 proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
-  var args = commandLineParams()
   const
-    version = "0.1.0"
+    version = "0.1.1"
     help = """
   Usage: rn [options] this[ that]
 
@@ -150,36 +166,39 @@ proc main() =
     rn "&" and
     rn -r copy
     rn -p "\s+" _
-    rn -g --dry "*.jpeg" image
+    rn --glob --dry "*.jpeg" image
   """
-    acceptedArgs = ["-r", "--recursive", "-d", "--dry", "-p", "--pattern",
+  # NOTE: basic arg parser implemented as the parseopt module is not suitable
+    acceptedOpts = ["-r", "--recursive", "-d", "--dry", "-p", "--pattern",
                     "-g", "--glob", "-h", "--help", "-v", "--version"]
   var
+    args = commandLineParams()
     rec = false
     dry = false
     reg = false
     glob = false
 
   proc filter(x: string): bool =
-    not acceptedArgs.contains(x)
+    ## filter out parsed options leaving only args remaining
+    not acceptedOpts.contains(x)
 
   if args.len < 1:
-    echo "<no argument>"
+    echo help
   else:
     for arg in args:
       if arg == "-h" or arg == "--help":
         echo help
         return
-      if arg == "-v" or arg == "--version":
+      elif arg == "-v" or arg == "--version":
         echo version
         return
-      if arg == "-r" or arg == "--recursive":
+      elif arg == "-r" or arg == "--recursive":
         rec = true
-      if arg == "-p" or arg == "--pattern":
+      elif arg == "-p" or arg == "--pattern":
         reg = true
-      if arg == "-d" or arg == "--dry":
+      elif arg == "-d" or arg == "--dry":
         dry = true
-      if arg == "-g" or arg == "--glob":
+      elif arg == "-g" or arg == "--glob":
         glob = true
 
     keepIf(args, filter)
@@ -188,32 +207,40 @@ proc main() =
       if rec:
         if args.len == 2:
           renameRec(re(args[0]), args[1], dry)
-        else:
+        elif args.len == 1:
           renameRec(re(args[0]), dry=dry)
+        else:
+          echo help
       else:
         if args.len == 2:
           rename(re(args[0]), args[1], dry)
-        else:
+        elif args.len == 1:
           rename(re(args[0]), dry=dry)
+        else:
+          echo help
     elif glob:
       if args.len == 2:
         renameGlob(args[0], args[1], dry)
-        # TEMP: work around --> no true rec glob proc in std
+        # TEMP: work around --> no working rec glob proc in std
         if rec:
           renameGlobRec(args[0], args[1], dry)
       else:
-        echo "invalid arguments"
+        echo help
     else:
       if rec:
         if args.len == 2:
           renameRec(args[0], args[1], dry)
-        else:
+        elif args.len == 1:
           renameRec(args[0], dry=dry)
+        else:
+          echo help
       else:
         if args.len == 2:
           rename(args[0], args[1], dry)
-        else:
+        elif args.len == 1:
           rename(args[0], dry=dry)
+        else:
+          echo help
 
 
 when isMainModule:

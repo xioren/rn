@@ -9,12 +9,21 @@
 + collision/overwrite safe
 
 
-### examples:
-```bash
-rn "&" and
-rn -r copy
-rn -p "\s+" _
-rn -g --dry "*.jpeg" image
+### usage:
+```
+rn [options] this[ that]
+
+Options:
+  -r, --recursive                 Rename files recursively
+  -p, --pattern                   Regex match
+  -g, --glob                      Glob match
+  -d, --dry                       Dry run
+
+Examples:
+  rn "&" and
+  rn -r copy
+  rn -p "\s+" _
+  rn --glob --dry "*.jpeg" image
 ```
 
 
