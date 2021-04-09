@@ -29,7 +29,7 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
   result = newFilepath
 
 
-proc rename(this: string | Regex, that = "", dry: bool) =
+proc rename(this: string | Regex, that: string, dry: bool) =
   ## replace "this" string or regex pattern with "that" string in filenames
   var
     newFilepath: string
@@ -59,7 +59,7 @@ proc rename(this: string | Regex, that = "", dry: bool) =
           echo "error renaming ", oldFilename
 
 
-proc renameRec(this: string | Regex, that = "", dry: bool) =
+proc renameRec(this: string | Regex, that: string, dry: bool) =
   ## recursively replace "this" string or regex pattern with "that" string in filenames
   var
     newFilepath: string
@@ -150,7 +150,7 @@ proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   const
-    version = "0.1.2"
+    version = "0.1.3"
     help = """
   Usage: rn [options] this[ that]
 
@@ -177,7 +177,7 @@ proc main() =
     glob = false
 
   proc filter(x: string): bool =
-    ## filter out parsed options leaving only args remaining
+    ## filter out parsed options
     not acceptedOpts.contains(x)
 
   if args.len < 1:
@@ -200,17 +200,14 @@ proc main() =
         glob = true
 
     keepIf(args, filter)
-    # NOTE: recheck args len after filtering
-    if args.len < 1:
-      echo help
-      return
-    let this = args[0]
+
     var that: string
     if args.len == 2:
       that = args[1]
     elif args.len != 1 or glob:
       echo help
       return
+    let this = args[0]
 
     if reg:
       if rec:
@@ -222,16 +219,15 @@ proc main() =
     elif glob:
       # glob
       renameGlob(this, that, dry)
-      # TEMP: work around --> no working rec glob proc in std
       if rec:
         # glob recursive
+        # TEMP: work around --> no working rec glob proc in std
         renameGlobRec(this, that, dry)
     else:
       if rec:
-      # recursive
+        # recursive
         renameRec(this, that, dry)
       else:
-        # with replacement
         rename(this, that, dry)
 
 
