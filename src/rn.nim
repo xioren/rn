@@ -7,6 +7,7 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
   stdout.styledWrite(fgCyan, oldFilename, " --> ")
 
   if parts[0] == oldFilename:
+    # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
     for part in parts[0..^2]:
