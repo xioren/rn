@@ -1,12 +1,12 @@
 import os, strutils, re, sequtils, strformat, terminal
 
 
-proc echoDelta(this: string | Regex, that, filename: string) {.inline.} =
+proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
   ## echo filename differences with highlighting
-  let parts = filename.split(this)
-  stdout.styledWrite(fgCyan, filename & " --> ")
+  let parts = oldFilename.split(this)
+  stdout.styledWrite(fgCyan, oldFilename, " --> ")
 
-  if parts[0] == filename:
+  if parts[0] == oldFilename:
     stdout.styledWriteLine(fgWhite, that)
   else:
     for part in parts[0..^2]:
@@ -23,7 +23,7 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
 
   newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   while fileExists(newFilepath):
-    n += 1
+    inc(n)
     newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   result = newFilepath
 
@@ -149,7 +149,7 @@ proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   const
-    version = "0.1.3"
+    version = "0.1.4"
     help = """
   Usage: rn [options] this[ that]
 
