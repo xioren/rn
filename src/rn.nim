@@ -20,8 +20,7 @@ proc makeUnique(oldFilepath: string): string {.inline.} =
   var
     n = 1
     newFilepath: string
-  let
-    (dir, name, ext) = splitFile(oldFilepath)
+  let (dir, name, ext) = splitFile(oldFilepath)
 
   newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   while fileExists(newFilepath):
@@ -202,44 +201,35 @@ proc main() =
 
     keepIf(args, filter)
 
+    let this = args[0]
+    var that: string
+    if args.len == 2:
+      that = args[1]
+    elif args.len != 1 or glob:
+      echo help
+      return
+
     if reg:
       if rec:
-        if args.len == 2:
-          renameRec(re(args[0]), args[1], dry)
-        elif args.len == 1:
-          renameRec(re(args[0]), dry=dry)
-        else:
-          echo help
+        # regex recursive
+        renameRec(re(this), that, dry)
       else:
-        if args.len == 2:
-          rename(re(args[0]), args[1], dry)
-        elif args.len == 1:
-          rename(re(args[0]), dry=dry)
-        else:
-          echo help
+        # regex
+        rename(re(this), that, dry)
     elif glob:
-      if args.len == 2:
-        renameGlob(args[0], args[1], dry)
-        # TEMP: work around --> no working rec glob proc in std
-        if rec:
-          renameGlobRec(args[0], args[1], dry)
-      else:
-        echo help
+      # glob
+      renameGlob(this, that, dry)
+      # TEMP: work around --> no working rec glob proc in std
+      if rec:
+        # glob recursive
+        renameGlobRec(this, that, dry)
     else:
       if rec:
-        if args.len == 2:
-          renameRec(args[0], args[1], dry)
-        elif args.len == 1:
-          renameRec(args[0], dry=dry)
-        else:
-          echo help
+      # recursive
+        renameRec(this, that, dry)
       else:
-        if args.len == 2:
-          rename(args[0], args[1], dry)
-        elif args.len == 1:
-          rename(args[0], dry=dry)
-        else:
-          echo help
+        # with replacement
+        rename(this, that, dry)
 
 
 when isMainModule:
