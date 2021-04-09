@@ -210,21 +210,16 @@ proc main() =
 
     if reg:
       if rec:
-        # regex recursive
         renameRec(re(this), that, dry)
       else:
-        # regex
         rename(re(this), that, dry)
     elif glob:
-      # glob
       renameGlob(this, that, dry)
       if rec:
-        # glob recursive
         # TEMP: work around --> no working rec glob proc in std
         renameGlobRec(this, that, dry)
     else:
       if rec:
-        # recursive
         renameRec(this, that, dry)
       else:
         rename(this, that, dry)
