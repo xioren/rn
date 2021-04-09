@@ -200,7 +200,10 @@ proc main() =
         glob = true
 
     keepIf(args, filter)
-
+    # NOTE: recheck args len after filtering
+    if args.len < 1:
+      echo help
+      return
     let this = args[0]
     var that: string
     if args.len == 2:
