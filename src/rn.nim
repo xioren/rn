@@ -10,8 +10,7 @@ proc echoDelta(this: string | Regex, that, filename: string) {.inline.} =
     stdout.styledWriteLine(fgWhite, that)
   else:
     for part in parts[0..^2]:
-      stdout.styledWrite(fgCyan, part)
-      stdout.styledWrite(fgWhite, that)
+      stdout.styledWrite(fgCyan, part, fgWhite, that)
     stdout.styledWriteLine(fgCyan, parts[^1])
 
 
