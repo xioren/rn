@@ -15,18 +15,15 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
     stdout.styledWriteLine(fgCyan, parts[^1])
 
 
-proc makeUnique(oldFilepath: string): string {.inline.} =
+proc makeUnique(filepath: var string) {.inline.} =
   ## make filenames unique
-  var
-    n = 1
-    newFilepath: string
-  let (dir, name, ext) = splitFile(oldFilepath)
+  var n = 1
+  let (dir, name, ext) = splitFile(filepath)
 
-  newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
-  while fileExists(newFilepath):
+  filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
+  while fileExists(filepath):
     inc(n)
-    newFilepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
-  result = newFilepath
+    filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
 
 
 proc rename(this: string | Regex, that: string, dry: bool) =
@@ -47,7 +44,7 @@ proc rename(this: string | Regex, that: string, dry: bool) =
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            newFilepath = makeUnique(newFilepath)
+            makeUnique(newFilepath)
 
         try:
           if not dry:
@@ -77,7 +74,7 @@ proc renameRec(this: string | Regex, that: string, dry: bool) =
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            newFilepath = makeUnique(newFilepath)
+            makeUnique(newFilepath)
 
         try:
           if not dry:
@@ -101,7 +98,7 @@ proc renameGlob(this, that: string, dry: bool) =
         if sameFile(oldFilepath, newFilepath):
           continue
         else:
-          newFilepath = makeUnique(newFilepath)
+          makeUnique(newFilepath)
 
       try:
         if not dry:
@@ -128,7 +125,7 @@ proc renameGlobRec(this, that: string, dry: bool) =
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            newFilepath = makeUnique(newFilepath)
+            makeUnique(newFilepath)
 
         try:
           if not dry:
@@ -142,7 +139,7 @@ proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   const
-    version = "0.1.4"
+    version = "0.1.5"
     help = """
   Usage: rn [options] this[ that]
 

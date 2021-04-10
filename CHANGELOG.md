@@ -1,3 +1,8 @@
+# v0.1.5
+
+## Changes
+- makeUnique now modifies path in place
+
 # v0.1.4
 
 ## Changes
