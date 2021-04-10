@@ -1,6 +1,7 @@
 # v0.1.4
 
 ## Changes
+- swap sameFileContent for sameFile proc
 - minor semantic changes
 
 ## Other

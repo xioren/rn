@@ -44,9 +44,7 @@ proc rename(this: string | Regex, that: string, dry: bool) =
         newFilepath = joinPath(dir, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
-          if sameFileContent(oldFilepath, newFilepath):
-            # BUG: erroneously removes non-duplicate files when new name == old name
-            # discard tryRemoveFile(oldFilepath)
+          if sameFile(oldFilepath, newFilepath):
             continue
           else:
             newFilepath = makeUnique(newFilepath)
@@ -76,9 +74,7 @@ proc renameRec(this: string | Regex, that: string, dry: bool) =
         newFilepath = joinPath(dir, addFileExt(newFilename, ext))
 
         if fileExists(newFilepath):
-          if sameFileContent(oldFilepath, newFilepath):
-            # BUG: erroneously removes non-duplicate files when new name == old name
-            # discard tryRemoveFile(oldFilepath)
+          if sameFile(oldFilepath, newFilepath):
             continue
           else:
             newFilepath = makeUnique(newFilepath)
@@ -102,9 +98,7 @@ proc renameGlob(this, that: string, dry: bool) =
       newFilepath = joinPath(dir, addFileExt(that, ext))
 
       if fileExists(newFilepath):
-        if sameFileContent(oldFilepath, newFilepath):
-          # BUG: erroneously removes non-duplicate files when new name == old name
-          # discard tryRemoveFile(oldFilepath)
+        if sameFile(oldFilepath, newFilepath):
           continue
         else:
           newFilepath = makeUnique(newFilepath)
@@ -131,9 +125,7 @@ proc renameGlobRec(this, that: string, dry: bool) =
         newFilepath = joinPath(dir, addFileExt(that, ext))
 
         if fileExists(newFilepath):
-          if sameFileContent(oldFilepath, newFilepath):
-            # BUG: erroneously removes non-duplicate files when new name == old name
-            # discard tryRemoveFile(oldFilepath)
+          if sameFile(oldFilepath, newFilepath):
             continue
           else:
             newFilepath = makeUnique(newFilepath)
