@@ -22,7 +22,7 @@ proc makeUnique(filepath: var string) {.inline.} =
 
   filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
   while fileExists(filepath):
-    inc(n)
+    inc n
     filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
 
 
