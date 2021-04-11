@@ -2,6 +2,8 @@
 
 ## Changes
 - makeUnique now modifies path in place
+
+## Other
 - fix versioning
 
 # v0.1.4
