@@ -5,7 +5,7 @@
 + minimal
 + supports regex and glob
 + shallow (default) and recursive modes
-+ hidden files safe
++ hidden files safe (*nix)
 + collision/overwrite safe
 
 
