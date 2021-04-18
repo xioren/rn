@@ -1,4 +1,4 @@
-import os, strutils, re, sequtils, strformat, terminal
+import std/[os, strutils, re, sequtils, strformat, terminal]
 
 
 proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
@@ -6,7 +6,7 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
   let parts = oldFilename.split(this)
   stdout.styledWrite(fgCyan, oldFilename, " --> ")
 
-  if parts[0] == oldFilename:
+  if parts.len == 1:
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
@@ -139,7 +139,7 @@ proc main() =
   ##[replace strings in filenames, takes 1 or two arguments,
   if second argument is absent, replaces first argument with empty string.]##
   const
-    version = "0.1.5"
+    version = "0.1.6"
     help = """
   Usage: rn [options] this[ that]
 

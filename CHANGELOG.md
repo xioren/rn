@@ -1,3 +1,8 @@
+# v0.1.6
+
+## Changes
+- minor semantic changes
+
 # v0.1.5
 
 ## Changes
