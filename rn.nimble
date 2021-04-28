@@ -10,4 +10,4 @@ bin           = @["rn"]
 
 # Dependencies
 
-requires "nim >= 1.0.7"
+requires "nim >= 1.0.6"
