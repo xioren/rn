@@ -1,3 +1,8 @@
+# v0.1.7
+
+## Changes
+- change colored output from cyan to magenta
+
 # v0.1.6
 
 ## Changes

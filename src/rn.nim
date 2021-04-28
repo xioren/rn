@@ -4,15 +4,15 @@ import std/[os, strutils, re, sequtils, strformat, terminal]
 proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
   ## echo filename differences with highlighting
   let parts = oldFilename.split(this)
-  stdout.styledWrite(fgCyan, oldFilename, " --> ")
+  stdout.styledWrite(fgMagenta, oldFilename, " --> ")
 
   if parts.len == 1:
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
     for part in parts[0..^2]:
-      stdout.styledWrite(fgCyan, part, fgWhite, that)
-    stdout.styledWriteLine(fgCyan, parts[^1])
+      stdout.styledWrite(fgMagenta, part, fgWhite, that)
+    stdout.styledWriteLine(fgMagenta, parts[^1])
 
 
 proc makeUnique(filepath: var string) {.inline.} =
