@@ -1,3 +1,8 @@
+# v0.1.8
+
+## Changes
+- add isHidden check to recursive procs
+
 # v0.1.7
 
 ## Changes
