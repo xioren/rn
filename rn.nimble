@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.7"
+version       = "0.1.8"
 author        = "xioren"
 description   = "minimal, performant mass renaming tool"
 license       = "MIT"

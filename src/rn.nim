@@ -61,9 +61,9 @@ proc renameRec(this: string | Regex, that: string, dry: bool) =
     newFilename: string
 
   for oldFilepath in walkDirRec(getCurrentDir()):
-    # NOTE: ignore non hidden files within hidden directories
-    # isHidden wont work here
-    if "/." notin oldFilepath:
+    #[ NOTE: ignore non hidden files within hidden directories
+      isHidden wont work 100% here ]#
+    if "/." notin oldFilepath and not isHidden(oldFilepath):
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
@@ -114,9 +114,9 @@ proc renameGlobRec(this, that: string, dry: bool) =
 
   for dir in walkDirRec(getCurrentDir(), yieldFilter = {pcDir}):
     for oldFilepath in walkFiles(joinPath(dir, this)):
-      # NOTE: ignore non hidden files within hidden directories
-      # isHidden wont work here
-      if "/." notin oldFilepath:
+      #[ NOTE: ignore non hidden files within hidden directories
+        isHidden wont work 100% here ]#
+      if "/." notin oldFilepath and not isHidden(oldFilepath):
         let (_, oldFilename, ext) = splitFile(oldFilepath)
 
         newFilepath = joinPath(dir, addFileExt(that, ext))
@@ -136,10 +136,10 @@ proc renameGlobRec(this, that: string, dry: bool) =
 
 
 proc main() =
-  ##[replace strings in filenames, takes 1 or two arguments,
-  if second argument is absent, replaces first argument with empty string.]##
+  ##[ replace strings in filenames, takes 1 or two arguments,
+  if second argument is absent, replaces first argument with empty string. ]##
   const
-    version = "0.1.7"
+    version = "0.1.8"
     help = """
   Usage: rn [options] this[ that]
 
