@@ -1,3 +1,8 @@
+# v0.1.9
+
+## Changes
+- use case statement for arg parsing
+
 # v0.1.8
 
 ## Changes

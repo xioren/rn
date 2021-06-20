@@ -10,7 +10,7 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
-    for part in parts[0..^2]:
+    for part in parts[0..<high(parts)]:
       stdout.styledWrite(fgMagenta, part, fgWhite, that)
     stdout.styledWriteLine(fgMagenta, parts[^1])
 
@@ -136,10 +136,10 @@ proc renameGlobRec(this, that: string, dry: bool) =
 
 
 proc main() =
-  ##[ replace strings in filenames, takes 1 or two arguments,
+  ##[ replace strings in filenames, takes one or two arguments.
   if second argument is absent, replaces first argument with empty string. ]##
   const
-    version = "0.1.8"
+    version = "0.1.9"
     help = """
   Usage: rn [options] this[ that]
 
@@ -160,10 +160,7 @@ proc main() =
                     "-g", "--glob", "-h", "--help", "-v", "--version"]
   var
     args = commandLineParams()
-    rec = false
-    dry = false
-    reg = false
-    glob = false
+    rec, dry, reg, glob: bool
 
   proc filter(x: string): bool =
     ## filter out parsed options
@@ -173,22 +170,23 @@ proc main() =
     echo help
   else:
     for arg in args:
-      if arg == "-h" or arg == "--help":
+      case arg
+      of "-h", "--help":
         echo help
         return
-      elif arg == "-v" or arg == "--version":
+      of "-v", "--version":
         echo version
         return
-      elif arg == "-r" or arg == "--recursive":
+      of "-r", "--recursive":
         rec = true
-      elif arg == "-R" or arg == "--regex":
+      of "-R", "--regex":
         reg = true
-      elif arg == "-d" or arg == "--dry":
+      of "-d", "--dry":
         dry = true
-      elif arg == "-g" or arg == "--glob":
+      of "-g", "--glob":
         glob = true
 
-    keepIf(args, filter)
+    args.keepIf(filter)
 
     var that: string
     if args.len == 2:
