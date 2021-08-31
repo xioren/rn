@@ -10,7 +10,7 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
-    for part in parts[0..<high(parts)]:
+    for part in parts[0..< ^1]:
       stdout.styledWrite(fgMagenta, part, fgWhite, that)
     stdout.styledWriteLine(fgMagenta, parts[^1])
 
@@ -28,6 +28,7 @@ proc makeUnique(filepath: var string) {.inline.} =
 
 proc rename(this: string | Regex, that: string, dry: bool) =
   ## replace "this" string or regex pattern with "that" string in filenames
+  # BUG: filenames containing periods and no extension will not match correctly
   var
     newFilepath: string
     newFilename: string
@@ -38,13 +39,13 @@ proc rename(this: string | Regex, that: string, dry: bool) =
 
       if oldFilename.contains(this):
         newFilename = oldFilename.replace(this, that)
-        newFilepath = joinPath(dir, addFileExt(newFilename, ext))
+        newFilepath = dir / newFilename & ext
 
         if fileExists(newFilepath):
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            makeUnique(newFilepath)
+            newFilepath.makeUnique()
 
         try:
           if not dry:
@@ -68,13 +69,13 @@ proc renameRec(this: string | Regex, that: string, dry: bool) =
 
       if oldFilename.contains(this):
         newFilename = oldFilename.replace(this, that)
-        newFilepath = joinPath(dir, addFileExt(newFilename, ext))
+        newFilepath = dir / newFilename & ext
 
         if fileExists(newFilepath):
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            makeUnique(newFilepath)
+            newFilepath.makeUnique()
 
         try:
           if not dry:
@@ -92,13 +93,13 @@ proc renameGlob(this, that: string, dry: bool) =
     if not isHidden(oldFilepath):
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 
-      newFilepath = joinPath(dir, addFileExt(that, ext))
+      newFilepath = dir / that & ext
 
       if fileExists(newFilepath):
         if sameFile(oldFilepath, newFilepath):
           continue
         else:
-          makeUnique(newFilepath)
+          newFilepath.makeUnique()
 
       try:
         if not dry:
@@ -119,13 +120,13 @@ proc renameGlobRec(this, that: string, dry: bool) =
       if "/." notin oldFilepath and not isHidden(oldFilepath):
         let (_, oldFilename, ext) = splitFile(oldFilepath)
 
-        newFilepath = joinPath(dir, addFileExt(that, ext))
+        newFilepath = dir / that & ext
 
         if fileExists(newFilepath):
           if sameFile(oldFilepath, newFilepath):
             continue
           else:
-            makeUnique(newFilepath)
+            newFilepath.makeUnique()
 
         try:
           if not dry:
@@ -139,7 +140,7 @@ proc main() =
   ##[ replace strings in filenames, takes one or two arguments.
   if second argument is absent, replaces first argument with empty string. ]##
   const
-    version = "0.1.9"
+    version = "0.2.0"
     help = """
   Usage: rn [options] this[ that]
 
@@ -185,6 +186,8 @@ proc main() =
         dry = true
       of "-g", "--glob":
         glob = true
+      else:
+        discard
 
     args.keepIf(filter)
 

@@ -1,3 +1,6 @@
+# v0.2.0
+- improve handling of filenames containing periods
+
 # v0.1.9
 
 ## Changes
