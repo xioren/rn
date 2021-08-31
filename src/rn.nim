@@ -20,10 +20,10 @@ proc makeUnique(filepath: var string) {.inline.} =
   var n = 1
   let (dir, name, ext) = splitFile(filepath)
 
-  filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
+  filepath = dir / fmt"{name}-{n}" & ext
   while fileExists(filepath):
     inc n
-    filepath = joinPath(dir, addFileExt(fmt"{name}-{n}", ext))
+    filepath = dir / fmt"{name}-{n}" & ext
 
 
 proc rename(this: string | Regex, that: string, dry: bool) =
