@@ -11,15 +11,15 @@
 
 ### usage:
 ```
-rn [options] this[ that]
+usage: rn [options] this[ that]
 
-Options:
-  -r, --recursive                 Rename files recursively
-  -R, --regex                     Regex match
-  -g, --glob                      Glob match
-  -d, --dry                       Dry run
+options:
+  -r, --recursive                 rename files recursively
+  -R, --regex                     regex match
+  -g, --glob                      glob match
+  -d, --dry                       dry run
 
-Examples:
+examples:
   rn "&" and
   rn -r copy
   rn -R "\s+" _

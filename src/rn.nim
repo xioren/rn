@@ -10,7 +10,7 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
-    for part in parts[0..< ^1]:
+    for part in parts[0..<^1]:
       stdout.styledWrite(fgMagenta, part, fgWhite, that)
     stdout.styledWriteLine(fgMagenta, parts[^1])
 
@@ -28,7 +28,6 @@ proc makeUnique(filepath: var string) {.inline.} =
 
 proc rename(this: string | Regex, that: string, dry: bool) =
   ## replace "this" string or regex pattern with "that" string in filenames
-  # BUG: filenames containing periods and no extension will not match correctly
   var
     newFilepath: string
     newFilename: string
@@ -39,6 +38,8 @@ proc rename(this: string | Regex, that: string, dry: bool) =
 
       if oldFilename.contains(this):
         newFilename = oldFilename.replace(this, that)
+        # IDEA: could encode, add ext, then decode
+        # NOTE: . == %2E
         newFilepath = dir / newFilename & ext
 
         if fileExists(newFilepath):
@@ -142,15 +143,15 @@ proc main() =
   const
     version = "0.2.0"
     help = """
-  Usage: rn [options] this[ that]
+  usage: rn [options] this[ that]
 
-  Options:
-    -r, --recursive                 Rename files recursively
-    -R, --regex                     Regex match
-    -g, --glob                      Glob match
-    -d, --dry                       Dry run
+  options:
+    -r, --recursive                 rename files recursively
+    -R, --regex                     regex match
+    -g, --glob                      glob match
+    -d, --dry                       dry run
 
-  Examples:
+  examples:
     rn "&" and
     rn -r copy
     rn -R "\s+" _
