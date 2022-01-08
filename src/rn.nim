@@ -10,15 +10,18 @@ proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
     # NOTE: no splitting occured
     stdout.styledWriteLine(fgWhite, that)
   else:
-    for part in parts[0..<^1]:
+    for part in parts[0..<parts.high]:
       stdout.styledWrite(fgMagenta, part, fgWhite, that)
     stdout.styledWriteLine(fgMagenta, parts[^1])
 
 
 proc makeUnique(filepath: var string) {.inline.} =
   ## make filenames unique
-  var n = 1
-  let (dir, name, ext) = splitFile(filepath)
+  var
+    n = 1
+    (dir, name, ext) = splitFile(filepath)
+  if name.len > 2 and name[^1].isDigit() and name[^2] == '-':
+    name = name[0..^3]
 
   filepath = dir / fmt"{name}-{n}" & ext
   while fileExists(filepath):
@@ -37,7 +40,7 @@ proc rename(this: string | Regex, that: string, dry: bool) =
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that)
+        newFilename = oldFilename.replacef(this, that)
         # IDEA: could encode, add ext, then decode
         # NOTE: . == %2E
         newFilepath = dir / newFilename & ext
@@ -69,7 +72,7 @@ proc renameRec(this: string | Regex, that: string, dry: bool) =
       let (dir, oldFilename, ext) = splitFile(oldFilepath)
 
       if oldFilename.contains(this):
-        newFilename = oldFilename.replace(this, that)
+        newFilename = oldFilename.replacef(this, that)
         newFilepath = dir / newFilename & ext
 
         if fileExists(newFilepath):
