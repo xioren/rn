@@ -1,3 +1,6 @@
+# v0.2.1
+- add regex capturing
+
 # v0.2.0
 - improve handling of filenames containing periods
 
