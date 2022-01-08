@@ -1,17 +1,39 @@
 import std/[os, strutils, re, sequtils, strformat, terminal]
 
 
-proc echoDelta(this: string | Regex, that, oldFilename: string) {.inline.} =
+proc echoDelta(this, that, oldFilename: string) {.inline.} =
   ## echo filename differences with highlighting
   let parts = oldFilename.split(this)
   stdout.styledWrite(fgMagenta, oldFilename, " --> ")
 
   if parts.len == 1:
     # NOTE: no splitting occured
-    stdout.styledWriteLine(fgWhite, that)
+    stdout.styledWriteLine(fgMagenta, oldFilename)
   else:
     for part in parts[0..<parts.high]:
       stdout.styledWrite(fgMagenta, part, fgWhite, that)
+    stdout.styledWriteLine(fgMagenta, parts[^1])
+
+
+proc echoDelta(this: Regex, that, oldFilename: string) {.inline.} =
+  ## echo filename differences with highlighting. handles regex captures.
+  let
+    parts = oldFilename.split(this)
+    matches = oldFilename.findAll(this)
+
+  stdout.styledWrite(fgMagenta, oldFilename, " --> ")
+
+  if parts.len == 1:
+    # NOTE: no splitting occured
+    stdout.styledWriteLine(fgMagenta, oldFilename)
+  else:
+    for part in parts[0..<parts.high]:
+      #[ NOTE: try to echo replacement string + captured re if one exists
+        this uses strutils and fails if the capture reference $n does not exist ]#
+      try:
+        stdout.styledWrite(fgMagenta, part, fgWhite, that % matches)
+      except ValueError:
+        stdout.styledWrite(fgMagenta, part, fgWhite, that)
     stdout.styledWriteLine(fgMagenta, parts[^1])
 
 
@@ -29,8 +51,68 @@ proc makeUnique(filepath: var string) {.inline.} =
     filepath = dir / fmt"{name}-{n}" & ext
 
 
-proc rename(this: string | Regex, that: string, dry: bool) =
-  ## replace "this" string or regex pattern with "that" string in filenames
+proc rename(this, that: string, dry: bool) =
+  ## replace "this" string with "that" string in filenames
+  var
+    newFilepath: string
+    newFilename: string
+
+  for kind, oldFilepath in walkDir(getCurrentDir()):
+    if kind == pcFile and not isHidden(oldFilepath):
+      let (dir, oldFilename, ext) = splitFile(oldFilepath)
+
+      if oldFilename.contains(this):
+        newFilename = oldFilename.replace(this, that)
+        # IDEA: could encode, add ext, then decode
+        # NOTE: . == %2E
+        newFilepath = dir / newFilename & ext
+
+        if fileExists(newFilepath):
+          if sameFile(oldFilepath, newFilepath):
+            continue
+          else:
+            newFilepath.makeUnique()
+
+        try:
+          if not dry:
+            moveFile(oldFilepath, newFilepath)
+          echoDelta(this, that, oldFilename)
+        except OSError:
+          echo "error renaming ", oldFilename
+
+
+proc renameRec(this, that: string, dry: bool) =
+  ## recursively replace "this" string with "that" string in filenames
+  var
+    newFilepath: string
+    newFilename: string
+
+  for oldFilepath in walkDirRec(getCurrentDir()):
+    #[ NOTE: ignore non hidden files within hidden directories
+      isHidden wont work 100% here ]#
+    if "/." notin oldFilepath and not isHidden(oldFilepath):
+      let (dir, oldFilename, ext) = splitFile(oldFilepath)
+
+      if oldFilename.contains(this):
+        newFilename = oldFilename.replace(this, that)
+        newFilepath = dir / newFilename & ext
+
+        if fileExists(newFilepath):
+          if sameFile(oldFilepath, newFilepath):
+            continue
+          else:
+            newFilepath.makeUnique()
+
+        try:
+          if not dry:
+            moveFile(oldFilepath, newFilepath)
+          echoDelta(this, that, oldFilename)
+        except OSError:
+          echo "error renaming ", oldFilename
+
+
+proc renameRegex(this: Regex, that: string, dry: bool) =
+  ## replace "this" regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -59,8 +141,8 @@ proc rename(this: string | Regex, that: string, dry: bool) =
           echo "error renaming ", oldFilename
 
 
-proc renameRec(this: string | Regex, that: string, dry: bool) =
-  ## recursively replace "this" string or regex pattern with "that" string in filenames
+proc renameRegexRec(this: Regex, that: string, dry: bool) =
+  ## recursively replace "this" regex pattern with "that" string in filenames
   var
     newFilepath: string
     newFilename: string
@@ -158,6 +240,7 @@ proc main() =
     rn "&" and
     rn -r copy
     rn -R "\s+" _
+    rn -R "(\d+)" "image-\$1"
     rn --glob --dry "*.jpeg" image
   """
   # NOTE: basic arg parser implemented as the parseopt module is not suitable
@@ -205,9 +288,9 @@ proc main() =
 
     if reg:
       if rec:
-        renameRec(re(this), that, dry)
+        renameRegexRec(re(this), that, dry)
       else:
-        rename(re(this), that, dry)
+        renameRegex(re(this), that, dry)
     elif glob:
       renameGlob(this, that, dry)
       if rec:
