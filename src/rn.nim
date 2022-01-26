@@ -23,9 +23,12 @@ proc echoDelta(this: Regex, that, oldFilename: string) {.inline.} =
 
   stdout.styledWrite(fgMagenta, oldFilename, " --> ")
 
-  if parts.len == 1:
+  if parts[0] == "":
     # NOTE: no splitting occured
-    stdout.styledWriteLine(fgMagenta, oldFilename)
+    if matches.len > 0:
+      stdout.styledWriteLine(fgWhite, that % matches)
+    else:
+      stdout.styledWriteLine(fgMagenta, oldFilename)
   else:
     for part in parts[0..<parts.high]:
       #[ NOTE: try to echo replacement string + captured re if one exists
@@ -240,8 +243,8 @@ proc main() =
     rn "&" and
     rn -r copy
     rn -R "\s+" _
-    rn -R "(\d+)" "image-\$1"
-    rn --glob --dry "*.jpeg" image
+    rn --regex "(\d+)" "myfile-\$1"
+    rn --glob --dry "*.jpeg" myimage
   """
   # NOTE: basic arg parser implemented as the parseopt module is not suitable
     acceptedOpts = ["-r", "--recursive", "-d", "--dry", "-R", "--regex",
@@ -294,7 +297,7 @@ proc main() =
     elif glob:
       renameGlob(this, that, dry)
       if rec:
-        # TEMP: work around --> no working rec glob proc in std
+        # TEMP: work around --> no working rec glob proc in stdlib
         renameGlobRec(this, that, dry)
     else:
       if rec:

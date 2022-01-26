@@ -23,7 +23,7 @@ examples:
   rn "&" and
   rn -r copy
   rn -R "\s+" _
-  rn -R "(\d+)" "image-\$1"
+  rn --regex "(\d+)" "image-\$1"
   rn --glob --dry "*.jpeg" image
 ```
 
