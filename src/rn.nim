@@ -229,7 +229,7 @@ proc main() =
   ##[ replace strings in filenames, takes one or two arguments.
   if second argument is absent, replaces first argument with empty string. ]##
   const
-    version = "0.2.1"
+    version = "0.2.2"
     help = """
   usage: rn [options] this[ that]
 
